@@ -1,4 +1,5 @@
 uniform float uTime;
+uniform sampler2D uBase;
 
 #include ../includes/simplexNoise4d.glsl
 
@@ -8,11 +9,14 @@ void main()
 
   vec2 uv = gl_FragCoord.xy / resolution.xy;
   vec4 particle = texture(uParticles, uv);
+  vec4 base = texture(uBase, uv);
+
 
    // Dead
     if(particle.a >= 1.0)
     {
         particle.a = 0.0;
+        particle.xyz = base.xyz;
     }
 
     // Alive
