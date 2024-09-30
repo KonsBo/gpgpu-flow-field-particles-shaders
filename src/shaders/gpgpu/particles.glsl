@@ -1,6 +1,7 @@
 uniform float uTime;
 uniform sampler2D uBase;
 uniform float uDeltaTime;
+uniform float uFlowFieldInfluence;
 
 #include ../includes/simplexNoise4d.glsl
 
@@ -25,7 +26,9 @@ void main()
     {
         // Strength
        float strength = simplexNoise4d(vec4(base.xyz * 0.2, time + 1.0));
-       strength = smoothstep(0.0, 1.0, strength);
+       float influence = (uFlowFieldInfluence - 0.5)* (-2.0);
+
+       strength = smoothstep(influence, 1.0, strength);
 
       // Flow field
        vec3 flowField = vec3(
