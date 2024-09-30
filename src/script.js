@@ -158,6 +158,10 @@ scene.add(gpgpu.debug);
  */
 const particles = {};
 
+//Geometry
+particles.geometry = new THREE.BufferGeometry();
+particles.geometry.setDrawRange(0, baseGeometry.count);
+
 // Material
 particles.material = new THREE.ShaderMaterial({
   vertexShader: particlesVertexShader,
@@ -170,11 +174,12 @@ particles.material = new THREE.ShaderMaterial({
         sizes.height * sizes.pixelRatio
       )
     ),
+    uParticlesTexture: new THREE.Uniform(),
   },
 });
 
 // Points
-particles.points = new THREE.Points(baseGeometry.instance, particles.material);
+particles.points = new THREE.Points(particles.geometry, particles.material);
 scene.add(particles.points);
 
 /**
@@ -206,6 +211,8 @@ const tick = () => {
 
   // gpgpu update
   gpgpu.computation.compute();
+  particles.material.uniforms.uParticlesTexture.value =
+    gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable).texture;
 
   // Render normal scene
   renderer.render(scene, camera);
