@@ -92,13 +92,12 @@ renderer.setClearColor(debugObject.clearColor);
  * Load model
  */
 const gltf = await gltfLoader.loadAsync("./model.glb");
-console.log(gltf);
 
 /**
  * Base Geometry
  */
 const baseGeometry = {};
-baseGeometry.instance = new THREE.SphereGeometry(3);
+baseGeometry.instance = gltf.scene.children[0].geometry;
 baseGeometry.count = baseGeometry.instance.attributes.position.count;
 
 /**
@@ -121,16 +120,13 @@ for (let i = 0; i < baseGeometry.count; i++) {
   const i3 = i * 3;
   const i4 = i * 4;
 
-  //position based on geometry
+  // Position based on geometry
   baseParticlesTexture.image.data[i4 + 0] =
     baseGeometry.instance.attributes.position.array[i3 + 0];
-
   baseParticlesTexture.image.data[i4 + 1] =
     baseGeometry.instance.attributes.position.array[i3 + 1];
-
-  baseParticlesTexture.image.data[i4 + 1] =
+  baseParticlesTexture.image.data[i4 + 2] =
     baseGeometry.instance.attributes.position.array[i3 + 2];
-
   baseParticlesTexture.image.data[i4 + 3] = 0;
 }
 
@@ -185,13 +181,17 @@ particles.geometry.setAttribute(
   "aParticlesUv",
   new THREE.BufferAttribute(particlesUvArray, 2)
 );
+particles.geometry.setAttribute(
+  "aColor",
+  baseGeometry.instance.attributes.color
+);
 
 // Material
 particles.material = new THREE.ShaderMaterial({
   vertexShader: particlesVertexShader,
   fragmentShader: particlesFragmentShader,
   uniforms: {
-    uSize: new THREE.Uniform(0.4),
+    uSize: new THREE.Uniform(0.07),
     uResolution: new THREE.Uniform(
       new THREE.Vector2(
         sizes.width * sizes.pixelRatio,
