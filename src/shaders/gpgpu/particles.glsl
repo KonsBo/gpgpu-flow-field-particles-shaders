@@ -8,6 +8,16 @@ void main()
 
   vec2 uv = gl_FragCoord.xy / resolution.xy;
   vec4 particle = texture(uParticles, uv);
+
+   // Dead
+    if(particle.a >= 1.0)
+    {
+        particle.a = 0.0;
+    }
+
+    // Alive
+    else
+    {
  
    // Flow field
     vec3 flowField = vec3(
@@ -18,5 +28,8 @@ void main()
     flowField = normalize(flowField);
     particle.xyz += flowField * 0.01;
 
+    // Decay
+    particle.a += 0.01;
+    }
     gl_FragColor = particle;
 }
