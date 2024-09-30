@@ -124,6 +124,18 @@ gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [
 
 // Init
 gpgpu.computation.init();
+
+//debug
+gpgpu.debug = new THREE.Mesh(
+  new THREE.PlaneGeometry(3, 3),
+  new THREE.MeshBasicMaterial({
+    map: gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable)
+      .texture,
+  })
+);
+gpgpu.debug.position.x = 3;
+scene.add(gpgpu.debug);
+
 /**
  * Particles
  */
