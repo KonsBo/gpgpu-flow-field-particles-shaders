@@ -7,6 +7,7 @@ import GUI from "lil-gui";
 import particlesVertexShader from "./shaders/particles/vertex.glsl";
 import particlesFragmentShader from "./shaders/particles/fragment.glsl";
 import { GPUComputationRenderer } from "three/examples/jsm/Addons.js";
+import gpgpuParticlesShader from "./shaders/gpgpu/particles.glsl";
 
 /**
  * Base
@@ -110,8 +111,19 @@ gpgpu.computation = new GPUComputationRenderer(
 
 // Base Particles
 const baseParticlesTexture = gpgpu.computation.createTexture();
-console.log(baseParticlesTexture);
 
+//Particles Variable
+gpgpu.particlesVariable = gpgpu.computation.addVariable(
+  "uParticles",
+  gpgpuParticlesShader,
+  baseParticlesTexture
+);
+gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [
+  gpgpu.particlesVariable,
+]);
+
+// Init
+gpgpu.computation.init();
 /**
  * Particles
  */
@@ -162,6 +174,9 @@ const tick = () => {
 
   // Update controls
   controls.update();
+
+  // gpgpu update
+  gpgpu.computation.compute();
 
   // Render normal scene
   renderer.render(scene, camera);
