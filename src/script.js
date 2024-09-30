@@ -2,11 +2,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
-
+import { GPUComputationRenderer } from "three/examples/jsm/Addons.js";
 import GUI from "lil-gui";
 import particlesVertexShader from "./shaders/particles/vertex.glsl";
 import particlesFragmentShader from "./shaders/particles/fragment.glsl";
-import { GPUComputationRenderer } from "three/examples/jsm/Addons.js";
 import gpgpuParticlesShader from "./shaders/gpgpu/particles.glsl";
 
 /**
@@ -90,6 +89,12 @@ debugObject.clearColor = "#29191f";
 renderer.setClearColor(debugObject.clearColor);
 
 /**
+ * Load model
+ */
+const gltf = await gltfLoader.loadAsync("./model.glb");
+console.log(gltf);
+
+/**
  * Base Geometry
  */
 const baseGeometry = {};
@@ -116,7 +121,7 @@ for (let i = 0; i < baseGeometry.count; i++) {
   const i3 = i * 3;
   const i4 = i * 4;
 
-  //positiom based on geometry
+  //position based on geometry
   baseParticlesTexture.image.data[i4 + 0] =
     baseGeometry.instance.attributes.position.array[i3 + 0];
 
@@ -159,8 +164,27 @@ scene.add(gpgpu.debug);
 const particles = {};
 
 //Geometry
+const particlesUvArray = new Float32Array(baseGeometry.count * 2);
+
+for (let y = 0; y < gpgpu.size; y++) {
+  for (let x = 0; x < gpgpu.size; x++) {
+    const i = y * gpgpu.size + x;
+    const i2 = i * 2;
+
+    const uvX = (x + 0.5) / gpgpu.size;
+    const uvY = (y + 0.5) / gpgpu.size;
+
+    particlesUvArray[i2 + 0] = uvX;
+    particlesUvArray[i2 + 1] = uvY;
+  }
+}
+
 particles.geometry = new THREE.BufferGeometry();
 particles.geometry.setDrawRange(0, baseGeometry.count);
+particles.geometry.setAttribute(
+  "aParticlesUv",
+  new THREE.BufferAttribute(particlesUvArray, 2)
+);
 
 // Material
 particles.material = new THREE.ShaderMaterial({
